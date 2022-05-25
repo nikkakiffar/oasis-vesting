@@ -3,7 +3,7 @@ pragma solidity ^0.8.3;
 library Consts {
     uint256 public constant cap = 5_000_000_000 * (10**18);
 
-    // Unlock percentage
+    // Unlock percentage (100% = 1000 if you need float percentage like 5,5)
     uint16 public constant TEAM_UNLOCK_PERCENTAGE = 0;
     uint16 public constant PRESEED_UNLOCK_PERCENTAGE = 0;
     uint16 public constant SEED_UNLOCK_PERCENTAGE = 0;
