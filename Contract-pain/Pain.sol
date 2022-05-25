@@ -3,7 +3,7 @@ pragma solidity ^0.8.3;
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import "./Consts.sol";
 
-contract IMP is ERC20Capped {
+contract Pain is ERC20Capped {
 
   event TGEPassed();
   event DistributionEpochFinished(AllocationGroup group, uint256 epoch);

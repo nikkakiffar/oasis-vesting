@@ -1,8 +1,8 @@
 pragma solidity ^0.8.3;
 
-import "./IMP.sol";
+import "./Pain.sol";
 
-contract MultisigIMP is IMP {
+contract MultisigPain is Pain {
 
     event NewProposal(uint256 id);
 
@@ -28,7 +28,7 @@ contract MultisigIMP is IMP {
         string memory _symbol,
         uint256 _amountForPublicSale,
         address[3] memory _admins
-    ) IMP(_name, _symbol, _amountForPublicSale) {
+    ) Pain(_name, _symbol, _amountForPublicSale) {
         admins = _admins;
     }
 
@@ -56,15 +56,6 @@ contract MultisigIMP is IMP {
     function proposeSetTGEPassed() public onlyAdmin {
         bytes memory signature = abi.encodeWithSelector(
             this.setTGEPassed.selector
-        );
-
-        addProposal(msg.sender, signature);
-    }
-
-
-    function proposeMainnetLaunched() public onlyAdmin {
-        bytes memory signature = abi.encodeWithSelector(
-            this.setMainnetLaunched.selector
         );
 
         addProposal(msg.sender, signature);
