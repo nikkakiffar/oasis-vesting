@@ -16,7 +16,7 @@ contract IMP is ERC20Capped {
   bool isPublicSaleTokensMinted = false;
 
   enum AllocationGroup {
-    Seed, Private, Team, Advisor, P2E, Liquidity, Marketing, Ecosystem, Farming
+    Team, Preseed, Seed, Private, Public, Advisor, Treasury, Partnership, Marketing, Stacking, Ecosystem, Farming, Liquidity
   }
 
   struct AccountData {
@@ -47,6 +47,16 @@ contract IMP is ERC20Capped {
     string memory _symbol,
     uint256 _amountForPublicSale
   ) ERC20(_name, _symbol) ERC20Capped(Consts.cap) {
+    // Team
+    groups[AllocationGroup.Team].unlockPercentage = Consts.TEAM_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Team].lockPeriod = Consts.TEAM_LOCK_PERIOD;
+    groups[AllocationGroup.Team].vestingEpochs = Consts.TEAM_VESTING_EPOCHS;
+
+    // Preseed group
+    groups[AllocationGroup.Preseed].unlockPercentage = Consts.PRESEED_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Preseed].lockPeriod = Consts.PRESEED_LOCK_PERIOD;
+    groups[AllocationGroup.Preseed].vestingEpochs = Consts.PRESEED_VESTING_EPOCHS;
+
     // Seed group
     groups[AllocationGroup.Seed].unlockPercentage = Consts.SEED_UNLOCK_PERCENTAGE;
     groups[AllocationGroup.Seed].lockPeriod = Consts.SEED_LOCK_PERIOD;
@@ -57,30 +67,35 @@ contract IMP is ERC20Capped {
     groups[AllocationGroup.Private].lockPeriod = Consts.PRIVATE_LOCK_PERIOD;
     groups[AllocationGroup.Private].vestingEpochs = Consts.PRIVATE_VESTING_EPOCHS;
 
-    // Team
-    groups[AllocationGroup.Team].unlockPercentage = Consts.TEAM_UNLOCK_PERCENTAGE;
-    groups[AllocationGroup.Team].lockPeriod = Consts.TEAM_LOCK_PERIOD;
-    groups[AllocationGroup.Team].vestingEpochs = Consts.TEAM_VESTING_EPOCHS;
+    // Public
+    groups[AllocationGroup.Public].unlockPercentage = Consts.PUBLIC_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Public].lockPeriod = Consts.PUBLIC_LOCK_PERIOD;
+    groups[AllocationGroup.Public].vestingEpochs = Consts.PUBLIC_VESTING_EPOCHS;
 
     // Advisor
     groups[AllocationGroup.Advisor].unlockPercentage = Consts.ADVISOR_UNLOCK_PERCENTAGE;
     groups[AllocationGroup.Advisor].lockPeriod = Consts.ADVISOR_LOCK_PERIOD;
     groups[AllocationGroup.Advisor].vestingEpochs = Consts.ADVISOR_VESTING_EPOCHS;
 
-    // P2E
-    groups[AllocationGroup.P2E].unlockPercentage = Consts.P2E_UNLOCK_PERCENTAGE;
-    groups[AllocationGroup.P2E].lockPeriod = Consts.P2E_LOCK_PERIOD;
-    groups[AllocationGroup.P2E].vestingEpochs = Consts.P2E_VESTING_EPOCHS;
+    // Treasury
+    groups[AllocationGroup.Treasury].unlockPercentage = Consts.TREASURY_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Treasury].lockPeriod = Consts.TREASURY_LOCK_PERIOD;
+    groups[AllocationGroup.Treasury].vestingEpochs = Consts.TREASURY_VESTING_EPOCHS;
 
-    // Liquidity
-    groups[AllocationGroup.Liquidity].unlockPercentage = Consts.LIQUIDITY_UNLOCK_PERCENTAGE;
-    groups[AllocationGroup.Liquidity].lockPeriod = Consts.LIQUIDITY_LOCK_PERIOD;
-    groups[AllocationGroup.Liquidity].vestingEpochs = Consts.LIQUIDITY_VESTING_EPOCHS;
+    // Partnership
+    groups[AllocationGroup.Partnership].unlockPercentage = Consts.PARTNERSHIP_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Partnership].lockPeriod = Consts.PARTNERSHIP_LOCK_PERIOD;
+    groups[AllocationGroup.Partnership].vestingEpochs = Consts.PARTNERSHIP_VESTING_EPOCHS;
 
     // Marketing
     groups[AllocationGroup.Marketing].unlockPercentage = Consts.MARKETING_UNLOCK_PERCENTAGE;
     groups[AllocationGroup.Marketing].lockPeriod = Consts.MARKETING_LOCK_PERIOD;
     groups[AllocationGroup.Marketing].vestingEpochs = Consts.MARKETING_VESTING_EPOCHS;
+
+    // Stacking
+    groups[AllocationGroup.Stacking].unlockPercentage = Consts.STAKING_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Stacking].lockPeriod = Consts.STAKING_LOCK_PERIOD;
+    groups[AllocationGroup.Stacking].vestingEpochs = Consts.STAKING_VESTING_EPOCHS;
 
     // Ecosystem
     groups[AllocationGroup.Ecosystem].unlockPercentage = Consts.ECOSYSTEM_UNLOCK_PERCENTAGE;
@@ -91,6 +106,11 @@ contract IMP is ERC20Capped {
     groups[AllocationGroup.Farming].unlockPercentage = Consts.FARMING_UNLOCK_PERCENTAGE;
     groups[AllocationGroup.Farming].lockPeriod = Consts.FARMING_LOCK_PERIOD;
     groups[AllocationGroup.Farming].vestingEpochs = Consts.FARMING_VESTING_EPOCHS;
+
+    // Liquidity
+    groups[AllocationGroup.Liquidity].unlockPercentage = Consts.LIQUIDITY_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Liquidity].lockPeriod = Consts.LIQUIDITY_LOCK_PERIOD;
+    groups[AllocationGroup.Liquidity].vestingEpochs = Consts.LIQUIDITY_VESTING_EPOCHS;
 
     amountForPublicSale = _amountForPublicSale;
   }
