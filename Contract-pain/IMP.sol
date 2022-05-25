@@ -6,11 +6,9 @@ import "./Consts.sol";
 contract IMP is ERC20Capped {
 
   event TGEPassed();
-  event MainnetLaunched();
   event DistributionEpochFinished(AllocationGroup group, uint256 epoch);
 
   uint256 public TGETimestamp = 0;
-  uint256 public mainnetLaunchTimestamp = 0;
   uint256 amountForPublicSale = 0;
 
   bool isPublicSaleTokensMinted = false;
@@ -144,16 +142,6 @@ contract IMP is ERC20Capped {
     emit TGEPassed();
   }
 
-  // Sets that mainnet was launched
-  function setMainnetLaunched() public onlyMultisig {
-    require(TGETimestamp != 0, "Cannot set mainnet launched before TGE");
-    require(mainnetLaunchTimestamp == 0, "Mainnet is already launched");
-
-    mainnetLaunchTimestamp = block.timestamp;
-    
-    emit MainnetLaunched();
-  }
-
   // Adds new participant if not exists
   function _addParticipant(AllocationGroup group, address account, uint256 balance) internal {
     require(balance > 0 && account != address(0), "Invalid balance or address of user!");
@@ -179,8 +167,7 @@ contract IMP is ERC20Capped {
   }
 
   function distribute(AllocationGroup group) public {
-    uint256 initialTimestamp = group == AllocationGroup.P2E ? mainnetLaunchTimestamp : TGETimestamp;
-    require(initialTimestamp != 0, "Distribution is not started yet");
+    require(TGETimestamp != 0, "Distribution is not started yet");
     require(groups[group].currentEpoch <= groups[group].vestingEpochs, "Distribution is already passed");
 
     GroupData storage groupData = groups[group];
@@ -188,7 +175,7 @@ contract IMP is ERC20Capped {
     require(isAvailablePeriod(
       groupData.currentEpoch,
       groupData.lockPeriod,
-      initialTimestamp,
+      TGETimestamp,
       group
     ), "It's too early for distribution");
 
@@ -242,12 +229,11 @@ contract IMP is ERC20Capped {
     
     // You cannot claim if your pending balance is 0
     if (accountData.balance == 0) return false;
-  
-    uint256 initialTimestamp = group == AllocationGroup.P2E ? mainnetLaunchTimestamp : TGETimestamp;
+    
     return isAvailablePeriod(
       accountData.epoch, 
       groups[group].lockPeriod, 
-      initialTimestamp,
+      TGETimestamp,
       group
     );
   }
