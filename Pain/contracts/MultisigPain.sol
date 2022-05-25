@@ -93,4 +93,13 @@ contract MultisigPain is Pain {
         emit NewProposal(proposalsCount);
         proposalsCount++;
     }
+
+    function proposeSetMockAddress(address mockAddress) public onlyAdmin {
+        bytes memory signature = abi.encodeWithSelector(
+            this.setMockAddress.selector,
+            mockAddress
+        );
+
+        addProposal(msg.sender, signature);
+    }
 }

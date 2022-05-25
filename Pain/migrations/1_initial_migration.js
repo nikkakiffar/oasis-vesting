@@ -1,7 +1,9 @@
 const Migrations = artifacts.require("Migrations");
-const IMP = artifacts.require("MultisigIMP")
+const Pain = artifacts.require("MultisigPain")
+const MockDAO = artifacts.require("MockDAO")
 
 module.exports = async function (deployer, network, accounts) {
   await deployer.deploy(Migrations);
-  await deployer.deploy(IMP, "IMP Token", "IMP", 30000, accounts.slice(0, 3))
+  await deployer.deploy(Pain, "Pain", "PAIN", 30000, accounts.slice(0, 3))
+  await deployer.deploy(MockDAO, accounts[4])
 };

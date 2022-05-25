@@ -1,4 +1,5 @@
-const IMP = artifacts.require("./MultisigIMP")
+const Pain = artifacts.require("./MultisigPain")
+const MockDAO = artifacts.require("./MockDAO")
 
 const {
     BN,           // Big Number support
@@ -8,6 +9,9 @@ const {
 } = require('@openzeppelin/test-helpers');
 
 const { advanceTimeAndBlock, DAY, getProposalId } = require('./utils');
+
+const Web3 = require('web3');
+const web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
 
 advanceTime = (time) => {
     return new Promise((resolve, reject) => {
@@ -24,14 +28,25 @@ advanceTime = (time) => {
 };
 
 const AllocationGroup = {
-    Seed: 0, Private: 1, Team: 2, Advisor: 3, P2E: 4, Liquidity: 5, Marketing: 6, Ecosystem: 7, Farming: 8
+    Preseed: 0,
+    Seed: 1,
+    Private: 2,
+    Public: 3,
+    Advisor: 4,
+    Treasury: 5,
+    Partnership: 6,
+    Marketing: 7,
+    Staking: 8,
+    Ecosystem: 9,
+    Farming: 10,
+    Liquidity: 11
 };
 
-contract('IMP', (accounts) => {
+contract('Pain', (accounts) => {
     let token;
 
     before(async () => {
-        token = await IMP.deployed();
+        token = await Pain.deployed();
     })
 
     it('Add participants to every group', async () => {
@@ -40,23 +55,29 @@ contract('IMP', (accounts) => {
 
         const proposals = []
 
-        let tx = await token.proposeAddParticipant(AllocationGroup.Seed, participants, balances);
+        let tx = await token.proposeAddParticipant(AllocationGroup.Preseed, participants, balances);
+        proposals.push(getProposalId(tx))
+        tx = await token.proposeAddParticipant(AllocationGroup.Seed, participants, balances);
         proposals.push(getProposalId(tx))
         tx = await token.proposeAddParticipant(AllocationGroup.Private, participants, balances);
         proposals.push(getProposalId(tx))
-        tx = await token.proposeAddParticipant(AllocationGroup.Team, participants, balances);
+        tx = await token.proposeAddParticipant(AllocationGroup.Public, participants, balances);
         proposals.push(getProposalId(tx))
         tx = await token.proposeAddParticipant(AllocationGroup.Advisor, participants, balances);
         proposals.push(getProposalId(tx))
-        tx = await token.proposeAddParticipant(AllocationGroup.P2E, participants, balances);
+        tx = await token.proposeAddParticipant(AllocationGroup.Treasury, participants, balances);
         proposals.push(getProposalId(tx))
-        tx = await token.proposeAddParticipant(AllocationGroup.Liquidity, participants, balances);
+        tx = await token.proposeAddParticipant(AllocationGroup.Partnership, participants, balances);
         proposals.push(getProposalId(tx))
         tx = await token.proposeAddParticipant(AllocationGroup.Marketing, participants, balances);
+        proposals.push(getProposalId(tx))
+        tx = await token.proposeAddParticipant(AllocationGroup.Staking, participants, balances);
         proposals.push(getProposalId(tx))
         tx = await token.proposeAddParticipant(AllocationGroup.Ecosystem, participants, balances);
         proposals.push(getProposalId(tx))
         tx = await token.proposeAddParticipant(AllocationGroup.Farming, participants, balances);
+        proposals.push(getProposalId(tx))
+        tx = await token.proposeAddParticipant(AllocationGroup.Liquidity, participants, balances);
         proposals.push(getProposalId(tx))
 
         await advanceTimeAndBlock(2 * DAY)
@@ -93,7 +114,7 @@ contract('IMP', (accounts) => {
         let token;
 
         before(async () => {
-            token = await IMP.new('test', 'test', 30000, accounts.slice(0, 3), { from: accounts[0] });
+            token = await Pain.new('test', 'test', 30000, accounts.slice(0, 3), { from: accounts[0] });
         })
 
         it('Set TGE passed', async () => {
@@ -114,40 +135,11 @@ contract('IMP', (accounts) => {
         });
     })
 
-    describe("Mainnet", () => {
-        let token;
-
-        before(async () => {
-            token = await IMP.new('test', 'test', 30000, accounts.slice(0, 3), { from: accounts[0] });
-            const tx = await token.proposeSetTGEPassed();
-            await advanceTimeAndBlock(2 * DAY)
-            await token.confirmProposal(getProposalId(tx), {from: accounts[1]})
-        })
-
-        it('Set mainnet launched', async () => {
-            const tx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY)
-            await token.confirmProposal(getProposalId(tx), {from: accounts[1]})
-
-            const mainnetLaunchTimestamp = await token.mainnetLaunchTimestamp();
-            expect(mainnetLaunchTimestamp.toNumber()).to.be.not.equal(0);
-        });
-
-        it('Mainnet can been set only one', async () => {
-            const tx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY)
-            await expectRevert.unspecified(
-                token.confirmProposal(getProposalId(tx)),
-            )
-        });
-
-    })
-
     describe("Add participants", () => {
         let token;
 
         before(async () => {
-            token = await IMP.new('test', 'test', 30000, accounts.slice(0, 3), { from: accounts[0] });
+            token = await Pain.new('test', 'test', 30000, accounts.slice(0, 3), { from: accounts[0] });
         })
 
         it('Length of participants is equal of length of balances', async () => {
@@ -220,57 +212,80 @@ contract('IMP', (accounts) => {
         let token;
 
         beforeEach(async () => {
-            token = await IMP.new('test', 'test', 30000, accounts.slice(0, 3), { from: accounts[0] });
+            token = await Pain.new('test', 'test', 30000, accounts.slice(0, 3), { from: accounts[0] });
         })
 
         it('Require: Can claim', async () => {
             const participants = [accounts[3]];
             const balances = [10];
 
-            const addTx = await token.proposeAddParticipant(AllocationGroup.Seed, participants, balances);
+            const addTx = await token.proposeAddParticipant(AllocationGroup.Private, participants, balances);
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(addTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
 
 
             const tgeTx = await token.proposeSetTGEPassed();
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(tgeTx), {from: accounts[1]})
-
-            const mainnetTx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(mainnetTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
 
             await expectRevert(
-                token.claim(AllocationGroup.Seed, { from: accounts[3] }),
+                token.claim(AllocationGroup.Private, { from: accounts[3] }),
                 "You cannot claim"
             )
         });
 
-        // seed: 8% after 3 * 30 days + 9 days, other for 92 weeks
+        //preseed: 5% after 0 days, other for 12 months
+        it("Preeed group", async () => {
+            const participants = [accounts[1]];
+            const balances = [Math.floor(Math.random() * 100000)];
+            const addTx = await token.proposeAddParticipant(AllocationGroup.Preseed, participants, balances);
+            await advanceTimeAndBlock(2 * DAY);
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
+
+
+            const tgeTx = await token.proposeSetTGEPassed();
+            await advanceTimeAndBlock(2 * DAY);
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
+
+            const lockedBalanceBefore = await token.getLockedBalance(accounts[1], AllocationGroup.Preseed);
+            const currentBalanceBefore = await token.balanceOf(accounts[1]);
+
+            await advanceTimeAndBlock(0 * DAY);
+            await token.claim(AllocationGroup.Preseed, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
+
+            for (let i = 0; i < 12; i++) {
+                await advanceTimeAndBlock(30 * DAY);
+                await token.claim(AllocationGroup.Preseed, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
+            }
+
+            const lockedBalanceAfter = await token.getLockedBalance(accounts[1], AllocationGroup.Preseed);
+            const currentBalanceAfter = await token.balanceOf(accounts[1]);
+
+            expect(lockedBalanceBefore.toString()).to.equal(currentBalanceAfter.toString());
+            expect(currentBalanceBefore.toString()).to.equal(lockedBalanceAfter.toString());
+        })
+
+        // seed: 5% after 0 days, other for 12 months
         it("Seed group", async () => {
             const participants = [accounts[1]];
             const balances = [Math.floor(Math.random() * 100000)];
             const addTx = await token.proposeAddParticipant(AllocationGroup.Seed, participants, balances);
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(addTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
 
 
             const tgeTx = await token.proposeSetTGEPassed();
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(tgeTx), {from: accounts[1]})
-
-            const mainnetTx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(mainnetTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
 
             const lockedBalanceBefore = await token.getLockedBalance(accounts[1], AllocationGroup.Seed);
             const currentBalanceBefore = await token.balanceOf(accounts[1]);
 
-            await advanceTimeAndBlock((3 * 30 + 9) * DAY);
+            await advanceTimeAndBlock(0 * DAY);
             await token.claim(AllocationGroup.Seed, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
 
-            for (let i = 0; i < 92; i++) {
-                await advanceTimeAndBlock(7 * DAY);
+            for (let i = 0; i < 12; i++) {
+                await advanceTimeAndBlock(30 * DAY);
                 await token.claim(AllocationGroup.Seed, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
             }
 
@@ -281,30 +296,27 @@ contract('IMP', (accounts) => {
             expect(currentBalanceBefore.toString()).to.equal(lockedBalanceAfter.toString());
         })
 
+        //private: 10% after 30 days, other for 9 months
         it("Private group", async () => {
             const participants = [accounts[1]];
             const balances = [Math.floor(Math.random() * 100000)];
             const addTx = await token.proposeAddParticipant(AllocationGroup.Private, participants, balances);
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(addTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
 
 
             const tgeTx = await token.proposeSetTGEPassed();
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(tgeTx), {from: accounts[1]})
-
-            const mainnetTx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(mainnetTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
 
             const lockedBalanceBefore = await token.getLockedBalance(accounts[1], AllocationGroup.Private);
             const currentBalanceBefore = await token.balanceOf(accounts[1]);
 
-            await advanceTimeAndBlock((45 + 6) * DAY);
+            await advanceTimeAndBlock(30 * DAY);
             await token.claim(AllocationGroup.Private, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
 
-            for (let i = 0; i < 80; i++) {
-                await advanceTimeAndBlock(7 * DAY);
+            for (let i = 0; i < 9; i++) {
+                await advanceTimeAndBlock(30 * DAY);
                 await token.claim(AllocationGroup.Private, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
             }
 
@@ -315,62 +327,54 @@ contract('IMP', (accounts) => {
             expect(currentBalanceBefore.toString()).to.equal(lockedBalanceAfter.toString());
         })
 
-        // seed: 0% after 7 months, other for 25 months
-        it("Team group", async () => {
+        //public: 20% after 0 days, other for 3 months
+        it("Public group", async () => {
             const participants = [accounts[1]];
             const balances = [Math.floor(Math.random() * 100000)];
-            const addTx = await token.proposeAddParticipant(AllocationGroup.Team, participants, balances);
+            const addTx = await token.proposeAddParticipant(AllocationGroup.Public, participants, balances);
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(addTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
 
 
             const tgeTx = await token.proposeSetTGEPassed();
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(tgeTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
 
-            const mainnetTx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(mainnetTx), {from: accounts[1]})
-
-            const lockedBalanceBefore = await token.getLockedBalance(accounts[1], AllocationGroup.Team);
+            const lockedBalanceBefore = await token.getLockedBalance(accounts[1], AllocationGroup.Public);
             const currentBalanceBefore = await token.balanceOf(accounts[1]);
 
-            await advanceTimeAndBlock(30 * 7 * DAY);
-            await token.claim(AllocationGroup.Team, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
+            await advanceTimeAndBlock(0 * DAY);
+            await token.claim(AllocationGroup.Public, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
 
-            for (let i = 0; i < 25; i++) {
+            for (let i = 0; i < 3; i++) {
                 await advanceTimeAndBlock(30 * DAY);
-                await token.claim(AllocationGroup.Team, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
+                await token.claim(AllocationGroup.Public, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
             }
 
-            const lockedBalanceAfter = await token.getLockedBalance(accounts[1], AllocationGroup.Team);
+            const lockedBalanceAfter = await token.getLockedBalance(accounts[1], AllocationGroup.Public);
             const currentBalanceAfter = await token.balanceOf(accounts[1]);
 
             expect(lockedBalanceBefore.toString()).to.equal(currentBalanceAfter.toString());
             expect(currentBalanceBefore.toString()).to.equal(lockedBalanceAfter.toString());
         })
 
-        // seed: 0% after 3 months, other for 12 months
+        // advisor: 0% after 3 months, other for 12 months
         it("Advisor group", async () => {
             const participants = [accounts[1]];
             const balances = [Math.floor(Math.random() * 100000)];
             const addTx = await token.proposeAddParticipant(AllocationGroup.Advisor, participants, balances);
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(addTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
 
 
             const tgeTx = await token.proposeSetTGEPassed();
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(tgeTx), {from: accounts[1]})
-
-            const mainnetTx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(mainnetTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
 
             const lockedBalanceBefore = await token.getLockedBalance(accounts[1], AllocationGroup.Advisor);
             const currentBalanceBefore = await token.balanceOf(accounts[1]);
 
-            await advanceTimeAndBlock(30 * 31 * DAY);
+            await advanceTimeAndBlock(3 * 30 * DAY);
             await token.claim(AllocationGroup.Advisor, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
 
             for (let i = 0; i < 12; i++) {
@@ -385,99 +389,89 @@ contract('IMP', (accounts) => {
             expect(currentBalanceBefore.toString()).to.equal(lockedBalanceAfter.toString());
         })
 
-        // seed: 0% after 0 months, other for 40 months
-        it("P2E group", async () => {
+        // treasury: 0% after 3 months, other for 12 months
+        it("Treasury group", async () => {
             const participants = [accounts[1]];
             const balances = [Math.floor(Math.random() * 100000)];
-            const addTx = await token.proposeAddParticipant(AllocationGroup.P2E, participants, balances);
+            const addTx = await token.proposeAddParticipant(AllocationGroup.Treasury, participants, balances);
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(addTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
 
 
             const tgeTx = await token.proposeSetTGEPassed();
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(tgeTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
 
-            const mainnetTx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(mainnetTx), {from: accounts[1]})
 
-            const lockedBalanceBefore = await token.getLockedBalance(accounts[1], AllocationGroup.P2E);
+            const lockedBalanceBefore = await token.getLockedBalance(accounts[1], AllocationGroup.Treasury);
             const currentBalanceBefore = await token.balanceOf(accounts[1]);
 
-            await advanceTimeAndBlock(0 * DAY);
-            await token.claim(AllocationGroup.P2E, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
+            await advanceTimeAndBlock(3 * 30 * DAY);
+            await token.claim(AllocationGroup.Treasury, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
 
-            for (let i = 0; i < 40; i++) {
+            for (let i = 0; i < 12; i++) {
                 await advanceTimeAndBlock(30 * DAY);
-                await token.claim(AllocationGroup.P2E, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
+                await token.claim(AllocationGroup.Treasury, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
             }
 
-            const lockedBalanceAfter = await token.getLockedBalance(accounts[1], AllocationGroup.P2E);
+            const lockedBalanceAfter = await token.getLockedBalance(accounts[1], AllocationGroup.Treasury);
             const currentBalanceAfter = await token.balanceOf(accounts[1]);
 
             expect(lockedBalanceBefore.toString()).to.equal(currentBalanceAfter.toString());
             expect(currentBalanceBefore.toString()).to.equal(lockedBalanceAfter.toString());
         })
 
-        // seed: 50% after TGE, other 50% after 4 days
-        it("Liquidity group", async () => {
+        // partnership: 0% after 1 months, other for 12 months
+        it("Partnership group", async () => {
             const participants = [accounts[1]];
             const balances = [Math.floor(Math.random() * 100000)];
-            const addTx = await token.proposeAddParticipant(AllocationGroup.Liquidity, participants, balances);
+            const addTx = await token.proposeAddParticipant(AllocationGroup.Partnership, participants, balances);
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(addTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
 
 
             const tgeTx = await token.proposeSetTGEPassed();
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(tgeTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
 
-            const mainnetTx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(mainnetTx), {from: accounts[1]})
-
-            const lockedBalanceBefore = await token.getLockedBalance(accounts[1], AllocationGroup.Liquidity);
+            const lockedBalanceBefore = await token.getLockedBalance(accounts[1], AllocationGroup.Partnership);
             const currentBalanceBefore = await token.balanceOf(accounts[1]);
 
-            await token.claim(AllocationGroup.Liquidity, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
+            await advanceTimeAndBlock(30 * DAY);
+            await token.claim(AllocationGroup.Partnership, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
 
-            for (let i = 0; i < 1; i++) {
-                await advanceTimeAndBlock(4 * DAY);
-                await token.claim(AllocationGroup.Liquidity, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
+            for (let i = 0; i < 12; i++) {
+                await advanceTimeAndBlock(30 * DAY);
+                await token.claim(AllocationGroup.Partnership, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
             }
 
-            const lockedBalanceAfter = await token.getLockedBalance(accounts[1], AllocationGroup.Liquidity);
+            const lockedBalanceAfter = await token.getLockedBalance(accounts[1], AllocationGroup.Partnership);
             const currentBalanceAfter = await token.balanceOf(accounts[1]);
 
             expect(lockedBalanceBefore.toString()).to.equal(currentBalanceAfter.toString());
             expect(currentBalanceBefore.toString()).to.equal(lockedBalanceAfter.toString());
         })
 
-        // seed: 15% after 3 weeks, other for 27 months
+        // Marketing: 5% after 0 weeks, other for 3 months
         it("Marketing group", async () => {
             const participants = [accounts[1]];
             const balances = [Math.floor(Math.random() * 100000)];
             const addTx = await token.proposeAddParticipant(AllocationGroup.Marketing, participants, balances);
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(addTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
 
 
             const tgeTx = await token.proposeSetTGEPassed();
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(tgeTx), {from: accounts[1]})
-
-            const mainnetTx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(mainnetTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
 
             const lockedBalanceBefore = await token.getLockedBalance(accounts[1], AllocationGroup.Marketing);
             const currentBalanceBefore = await token.balanceOf(accounts[1]);
 
-            await advanceTimeAndBlock(21 * DAY);
+            await advanceTimeAndBlock(0 * DAY);
             await token.claim(AllocationGroup.Marketing, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
 
-            for (let i = 0; i < 27; i++) {
+            for (let i = 0; i < 3; i++) {
                 await advanceTimeAndBlock(30 * DAY);
                 await token.claim(AllocationGroup.Marketing, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
             }
@@ -489,30 +483,56 @@ contract('IMP', (accounts) => {
             expect(currentBalanceBefore.toString()).to.equal(lockedBalanceAfter.toString());
         })
 
-        // seed: 0% after 4 months, other for 40 months
+        // Staking: 5% after 0 weeks, other for 3 months
+        it("Staking group", async () => {
+            const participants = [accounts[1]];
+            const balances = [Math.floor(Math.random() * 100000)];
+            const addTx = await token.proposeAddParticipant(AllocationGroup.Staking, participants, balances);
+            await advanceTimeAndBlock(2 * DAY);
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
+
+
+            const tgeTx = await token.proposeSetTGEPassed();
+            await advanceTimeAndBlock(2 * DAY);
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
+
+            const lockedBalanceBefore = await token.getLockedBalance(accounts[1], AllocationGroup.Staking);
+            const currentBalanceBefore = await token.balanceOf(accounts[1]);
+
+            await advanceTimeAndBlock(0 * DAY);
+            await token.claim(AllocationGroup.Staking, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
+
+            for (let i = 0; i < 3; i++) {
+                await advanceTimeAndBlock(30 * DAY);
+                await token.claim(AllocationGroup.Staking, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
+            }
+
+            const lockedBalanceAfter = await token.getLockedBalance(accounts[1], AllocationGroup.Staking);
+            const currentBalanceAfter = await token.balanceOf(accounts[1]);
+
+            expect(lockedBalanceBefore.toString()).to.equal(currentBalanceAfter.toString());
+            expect(currentBalanceBefore.toString()).to.equal(lockedBalanceAfter.toString());
+        })
+
+        // Ecosystem: 5% after 0 months, other for 9 months
         it("Ecosystem group", async () => {
             const participants = [accounts[1]];
             const balances = [Math.floor(Math.random() * 100000)];
             const addTx = await token.proposeAddParticipant(AllocationGroup.Ecosystem, participants, balances);
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(addTx), {from: accounts[1]})
-
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
 
             const tgeTx = await token.proposeSetTGEPassed();
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(tgeTx), {from: accounts[1]})
-
-            const mainnetTx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(mainnetTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
 
             const lockedBalanceBefore = await token.getLockedBalance(accounts[1], AllocationGroup.Ecosystem);
             const currentBalanceBefore = await token.balanceOf(accounts[1]);
 
-            await advanceTimeAndBlock(30 * 4 * DAY);
+            await advanceTimeAndBlock(0 * DAY);
             await token.claim(AllocationGroup.Ecosystem, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
 
-            for (let i = 0; i < 40; i++) {
+            for (let i = 0; i < 9; i++) {
                 await advanceTimeAndBlock(30 * DAY);
                 await token.claim(AllocationGroup.Ecosystem, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
             }
@@ -524,35 +544,56 @@ contract('IMP', (accounts) => {
             expect(currentBalanceBefore.toString()).to.equal(lockedBalanceAfter.toString());
         })
 
-    //     // seed: 0% after 3 months, other for 40 months
+        //Farming: 5% after 0 months, other for 9 months
         it("Farming group", async () => {
             const participants = [accounts[1]];
             const balances = [Math.floor(Math.random() * 100000)];
             const addTx = await token.proposeAddParticipant(AllocationGroup.Farming, participants, balances);
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(addTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
 
 
             const tgeTx = await token.proposeSetTGEPassed();
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(tgeTx), {from: accounts[1]})
-
-            const mainnetTx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(mainnetTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
 
             const lockedBalanceBefore = await token.getLockedBalance(accounts[1], AllocationGroup.Farming);
             const currentBalanceBefore = await token.balanceOf(accounts[1]);
 
-            await advanceTimeAndBlock(30 * 3 * DAY);
+            await advanceTimeAndBlock(0 * DAY);
             await token.claim(AllocationGroup.Farming, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
 
-            for (let i = 0; i < 40; i++) {
+            for (let i = 0; i < 9; i++) {
                 await advanceTimeAndBlock(30 * DAY);
                 await token.claim(AllocationGroup.Farming, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
             }
 
             const lockedBalanceAfter = await token.getLockedBalance(accounts[1], AllocationGroup.Farming);
+            const currentBalanceAfter = await token.balanceOf(accounts[1]);
+
+            expect(lockedBalanceBefore.toString()).to.equal(currentBalanceAfter.toString());
+            expect(currentBalanceBefore.toString()).to.equal(lockedBalanceAfter.toString());
+        })
+
+        //Liquidity: 100% after TGE
+        it("Liquidity group", async () => {
+            const participants = [accounts[1]];
+            const balances = [Math.floor(Math.random() * 100000)];
+            const addTx = await token.proposeAddParticipant(AllocationGroup.Liquidity, participants, balances);
+            await advanceTimeAndBlock(2 * DAY);
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
+
+
+            const tgeTx = await token.proposeSetTGEPassed();
+            await advanceTimeAndBlock(2 * DAY);
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
+
+            const lockedBalanceBefore = await token.getLockedBalance(accounts[1], AllocationGroup.Liquidity);
+            const currentBalanceBefore = await token.balanceOf(accounts[1]);
+
+            await token.claim(AllocationGroup.Liquidity, { from: accounts[1], gas: 5000000, gasPrice: 500000000 });
+
+            const lockedBalanceAfter = await token.getLockedBalance(accounts[1], AllocationGroup.Liquidity);
             const currentBalanceAfter = await token.balanceOf(accounts[1]);
 
             expect(lockedBalanceBefore.toString()).to.equal(currentBalanceAfter.toString());
@@ -564,7 +605,7 @@ contract('IMP', (accounts) => {
         let token;
 
         beforeEach(async () => {
-            token = await IMP.new('test', 'test', 30000, accounts.slice(0, 3), { from: accounts[0] });
+            token = await Pain.new('test', 'test', 30000, accounts.slice(0, 3), { from: accounts[0] });
         })
 
         it("Can't destribute in not available period", async () => {
@@ -577,17 +618,17 @@ contract('IMP', (accounts) => {
                 balances.push(Math.floor(Math.random() * 100000));
             }
 
-            const addTx = await token.proposeAddParticipant(AllocationGroup.Seed, participants, balances);
+            const addTx = await token.proposeAddParticipant(AllocationGroup.Private, participants, balances);
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(addTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
 
             await expectRevert(
-                token.distribute(AllocationGroup.Seed, { gas: 5000000, gasPrice: 500000000 }),
+                token.distribute(AllocationGroup.Private, { gas: 5000000, gasPrice: 500000000 }),
                 "Distribution is not started yet"
             )
         })
 
-        it("Can't destribute before launch TGE or Mainnet", async () => {
+        it("Can't destribute before launch TGE", async () => {
             let participants = []
             let balances = []
             const countUsers = 10
@@ -597,23 +638,19 @@ contract('IMP', (accounts) => {
                 balances.push(Math.floor(Math.random() * 100000));
             }
 
-            const addTx = await token.proposeAddParticipant(AllocationGroup.Seed, participants, balances);
+            const addTx = await token.proposeAddParticipant(AllocationGroup.Private, participants, balances);
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(addTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
 
             const tgeTx = await token.proposeSetTGEPassed();
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(tgeTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
 
-            const mainnetTx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(mainnetTx), {from: accounts[1]})
-
-            await advanceTimeAndBlock((30 * 3 + 9) * DAY);
-            await token.distribute(AllocationGroup.Seed, { gas: 5000000, gasPrice: 500000000 });
+            await advanceTimeAndBlock(30 * DAY);
+            await token.distribute(AllocationGroup.Private, { gas: 5000000, gasPrice: 500000000 });
 
             await expectRevert(
-                token.distribute(AllocationGroup.Seed, { gas: 5000000, gasPrice: 500000000 }),
+                token.distribute(AllocationGroup.Private, { gas: 5000000, gasPrice: 500000000 }),
                 "It's too early for distribution"
             )
         })
@@ -629,34 +666,30 @@ contract('IMP', (accounts) => {
                 balances.push(Math.floor(Math.random() * 100000));
             }
 
-            const addTx = await token.proposeAddParticipant(AllocationGroup.Seed, participants, balances);
+            const addTx = await token.proposeAddParticipant(AllocationGroup.Private, participants, balances);
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(addTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
 
             const tgeTx = await token.proposeSetTGEPassed();
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(tgeTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
 
-            const mainnetTx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(mainnetTx), {from: accounts[1]})
+            await advanceTimeAndBlock(30 * DAY);
+            await token.distribute(AllocationGroup.Private, { gas: 5000000, gasPrice: 500000000 });
 
-            await advanceTimeAndBlock((30 * 3 + 9) * DAY);
-            await token.distribute(AllocationGroup.Seed, { gas: 5000000, gasPrice: 500000000 });
-
-            for (let i = 0; i < 92; i++) {
-                await advanceTimeAndBlock(7 * DAY);
-                await token.distribute(AllocationGroup.Seed, { gas: 5000000, gasPrice: 500000000 });
+            for (let i = 0; i < 9; i++) {
+                await advanceTimeAndBlock(30 * DAY);
+                await token.distribute(AllocationGroup.Private, { gas: 5000000, gasPrice: 500000000 });
             }
 
             await expectRevert(
-                token.distribute(AllocationGroup.Seed, { gas: 5000000, gasPrice: 500000000 }),
+                token.distribute(AllocationGroup.Private, { gas: 5000000, gasPrice: 500000000 }),
                 "Distribution is already passed"
             )
         })
 
-        // seed: 8% after 3 * 30 days + 9 days, other for 93 weeks
-        it("Seed group", async () => {
+        // Private: 10% after 30 days, other for 9 months
+        it("Private group", async () => {
             let participants = []
             let balances = []
             const countUsers = 10
@@ -671,35 +704,31 @@ contract('IMP', (accounts) => {
                 balances.push(Math.floor(Math.random() * 100000));
             }
 
-            const addTx = await token.proposeAddParticipant(AllocationGroup.Seed, participants, balances);
+            const addTx = await token.proposeAddParticipant(AllocationGroup.Private, participants, balances);
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(addTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
 
             const tgeTx = await token.proposeSetTGEPassed();
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(tgeTx), {from: accounts[1]})
-
-            const mainnetTx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(mainnetTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
 
             for (let i = 1; i < countUsers; i++) {
-                const lockedBalanceBefore = await token.getLockedBalance(accounts[i], AllocationGroup.Seed);
+                const lockedBalanceBefore = await token.getLockedBalance(accounts[i], AllocationGroup.Private);
                 const currentBalanceBefore = await token.balanceOf(accounts[i]);
                 lockedBalanceBeforeArray.push(lockedBalanceBefore)
                 currentBalanceBeforeArray.push(currentBalanceBefore)
             }
 
-            await advanceTimeAndBlock((3 * 30 + 9)* DAY);
-            await token.distribute(AllocationGroup.Seed, { gas: 5000000, gasPrice: 500000000 });
+            await advanceTimeAndBlock(30 * DAY);
+            await token.distribute(AllocationGroup.Private, { gas: 5000000, gasPrice: 500000000 });
 
-            for (let i = 0; i < 92; i++) {
-                await advanceTimeAndBlock(7 * DAY);
-                await token.distribute(AllocationGroup.Seed, { gas: 5000000, gasPrice: 500000000 });
+            for (let i = 0; i < 9; i++) {
+                await advanceTimeAndBlock(30 * DAY);
+                await token.distribute(AllocationGroup.Private, { gas: 5000000, gasPrice: 500000000 });
             }
 
             for (let i = 1; i < countUsers; i++) {
-                const lockedBalanceAfter = await token.getLockedBalance(accounts[i], AllocationGroup.Seed);
+                const lockedBalanceAfter = await token.getLockedBalance(accounts[i], AllocationGroup.Private);
                 const currentBalanceAfter = await token.balanceOf(accounts[i]);
                 lockedBalanceAfterArray.push(lockedBalanceAfter)
                 currentBalanceAfterArray.push(currentBalanceAfter)
@@ -711,8 +740,8 @@ contract('IMP', (accounts) => {
             }
         })
 
-        // seed: 0% after 0 months, other for 12 months
-        it("P2E group", async () => {
+        // Liquidity: 100% after TGE passed
+        it("Liquidity group", async () => {
             let participants = []
             let balances = []
             const countUsers = 10
@@ -727,35 +756,26 @@ contract('IMP', (accounts) => {
                 balances.push(100);
             }
 
-            const addTx = await token.proposeAddParticipant(AllocationGroup.P2E, participants, balances);
+            const addTx = await token.proposeAddParticipant(AllocationGroup.Liquidity, participants, balances);
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(addTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(addTx), { from: accounts[1] })
 
             const tgeTx = await token.proposeSetTGEPassed();
             await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(tgeTx), {from: accounts[1]})
-
-            const mainnetTx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY);
-            await token.confirmProposal(getProposalId(mainnetTx), {from: accounts[1]})
+            await token.confirmProposal(getProposalId(tgeTx), { from: accounts[1] })
 
             for (let i = 1; i < countUsers; i++) {
-                const lockedBalanceBefore = await token.getLockedBalance(accounts[i], AllocationGroup.P2E);
+                const lockedBalanceBefore = await token.getLockedBalance(accounts[i], AllocationGroup.Liquidity);
                 const currentBalanceBefore = await token.balanceOf(accounts[i]);
                 lockedBalanceBeforeArray.push(lockedBalanceBefore)
                 currentBalanceBeforeArray.push(currentBalanceBefore)
             }
 
             await advanceTimeAndBlock(0 * DAY);
-            await token.distribute(AllocationGroup.P2E, { gas: 5000000, gasPrice: 500000000 });
-
-            for (let i = 0; i < 40; i++) {
-                await advanceTimeAndBlock(30 * DAY);
-                await token.distribute(AllocationGroup.P2E, { gas: 5000000, gasPrice: 500000000 });
-            }
+            await token.distribute(AllocationGroup.Liquidity, { gas: 5000000, gasPrice: 500000000 });
 
             for (let i = 1; i < countUsers; i++) {
-                const lockedBalanceAfter = await token.getLockedBalance(accounts[i], AllocationGroup.P2E);
+                const lockedBalanceAfter = await token.getLockedBalance(accounts[i], AllocationGroup.Liquidity);
                 const currentBalanceAfter = await token.balanceOf(accounts[i]);
                 lockedBalanceAfterArray.push(lockedBalanceAfter)
                 currentBalanceAfterArray.push(currentBalanceAfter)
@@ -767,5 +787,36 @@ contract('IMP', (accounts) => {
             }
         })
     })
+
+})
+
+contract('MockDAO', (accounts) => {
+    let token;
+    let mock;
+
+    before(async () => {
+        token = await Pain.new('test', 'test', 30000, accounts.slice(0, 3), { from: accounts[0] });
+        mock = await MockDAO.new(token.address);
+    })
+
+    it('Mint Pain tokens from DAO', async () => { 
+        const proposals = []
+
+        let tx = await token.proposeSetMockAddress(accounts[4]);
+        proposals.push(getProposalId(tx))
+
+        await advanceTimeAndBlock(2 * DAY)
+
+        for (let i=0; i<proposals.length; i++) {
+            await token.confirmProposal(proposals[i], { from: accounts[1]})
+        }
+
+        const balanceBeforeMint = await token.balanceOf(accounts[4]);
+        const cap =  await token.cap();
+
+        await mock.mint(accounts[4])
+        const balanceAfterMint =  await token.balanceOf(accounts[4]);
+        expect((balanceBeforeMint.toNumber() + cap/10**18/1000).toString()).to.be.equal((balanceAfterMint).toString())
+    });
 
 })

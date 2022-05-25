@@ -122,7 +122,7 @@ contract Pain is ERC20Capped {
     mockAddress = _mockAddress;
   }
 
-  function mintPain(address _to) public onlyMultisig {
+  function mintPain(address _to) public {
     require(mockAddress == _to, "mintMemorial: Invalid input address");
     uint256 amountForMintMemorial = Consts.cap / 1000 / (10**18);
     _mint(_to, amountForMintMemorial);
