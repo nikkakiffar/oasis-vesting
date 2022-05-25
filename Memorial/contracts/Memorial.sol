@@ -17,7 +17,7 @@ contract Memorial is ERC20Capped {
   bool isPublicSaleTokensMinted = false;
 
   enum AllocationGroup {
-    Team, Preseed, Seed, Private, Public, Advisor, Treasury, Partnership, Marketing, Stacking, Ecosystem, Farming, Liquidity
+    Team, Preseed, Seed, Private, Public, Advisor, Treasury, Partnership, Marketing, Staking, Ecosystem, Farming, Liquidity
   }
 
   struct AccountData {
@@ -93,10 +93,10 @@ contract Memorial is ERC20Capped {
     groups[AllocationGroup.Marketing].lockPeriod = Consts.MARKETING_LOCK_PERIOD;
     groups[AllocationGroup.Marketing].vestingEpochs = Consts.MARKETING_VESTING_EPOCHS;
 
-    // Stacking
-    groups[AllocationGroup.Stacking].unlockPercentage = Consts.STAKING_UNLOCK_PERCENTAGE;
-    groups[AllocationGroup.Stacking].lockPeriod = Consts.STAKING_LOCK_PERIOD;
-    groups[AllocationGroup.Stacking].vestingEpochs = Consts.STAKING_VESTING_EPOCHS;
+    // Staking
+    groups[AllocationGroup.Staking].unlockPercentage = Consts.STAKING_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Staking].lockPeriod = Consts.STAKING_LOCK_PERIOD;
+    groups[AllocationGroup.Staking].vestingEpochs = Consts.STAKING_VESTING_EPOCHS;
 
     // Ecosystem
     groups[AllocationGroup.Ecosystem].unlockPercentage = Consts.ECOSYSTEM_UNLOCK_PERCENTAGE;
