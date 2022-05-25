@@ -42,6 +42,7 @@ contract MultisigMemorial is Memorial {
 
         addProposal(msg.sender, signature);
     }
+    
 
     function proposeRemoveParticipant(AllocationGroup group, address account) public onlyAdmin {
         bytes memory signature = abi.encodeWithSelector(
@@ -92,5 +93,14 @@ contract MultisigMemorial is Memorial {
 
         emit NewProposal(proposalsCount);
         proposalsCount++;
+    }
+
+    function proposeMemorialMint(address to) public onlyAdmin {
+        bytes memory signature = abi.encodeWithSelector(
+            this.mintMemorial.selector,
+            to
+        );
+
+        addProposal(msg.sender, signature);
     }
 }

@@ -1,4 +1,4 @@
-const IMP = artifacts.require("./MultisigIMP")
+const IMP = artifacts.require("./MultisigMemorial")
 
 const {
     BN,           // Big Number support
@@ -24,7 +24,19 @@ advanceTime = (time) => {
 };
 
 const AllocationGroup = {
-    Seed: 0, Private: 1, Team: 2, Advisor: 3, P2E: 4, Liquidity: 5, Marketing: 6, Ecosystem: 7, Farming: 8
+    Team: 0, 
+    Preseed: 1, 
+    Seed: 2, 
+    Private: 3, 
+    Public: 4, 
+    Advisor: 5, 
+    Treasury: 6, 
+    Partnership: 7, 
+    Marketing: 8, 
+    Stacking: 9, 
+    Ecosystem: 10, 
+    Farming: 11, 
+    Liquidity: 12
 };
 
 contract('IMP', (accounts) => {
@@ -40,23 +52,31 @@ contract('IMP', (accounts) => {
 
         const proposals = []
 
-        let tx = await token.proposeAddParticipant(AllocationGroup.Seed, participants, balances);
+        let tx = await token.proposeAddParticipant(AllocationGroup.Team, participants, balances);
+        proposals.push(getProposalId(tx))
+        tx = await token.proposeAddParticipant(AllocationGroup.Preseed, participants, balances);
+        proposals.push(getProposalId(tx))
+        tx = await token.proposeAddParticipant(AllocationGroup.Seed, participants, balances);
         proposals.push(getProposalId(tx))
         tx = await token.proposeAddParticipant(AllocationGroup.Private, participants, balances);
         proposals.push(getProposalId(tx))
-        tx = await token.proposeAddParticipant(AllocationGroup.Team, participants, balances);
+        tx = await token.proposeAddParticipant(AllocationGroup.Public, participants, balances);
         proposals.push(getProposalId(tx))
         tx = await token.proposeAddParticipant(AllocationGroup.Advisor, participants, balances);
         proposals.push(getProposalId(tx))
-        tx = await token.proposeAddParticipant(AllocationGroup.P2E, participants, balances);
+        tx = await token.proposeAddParticipant(AllocationGroup.Treasury, participants, balances);
         proposals.push(getProposalId(tx))
-        tx = await token.proposeAddParticipant(AllocationGroup.Liquidity, participants, balances);
+        tx = await token.proposeAddParticipant(AllocationGroup.Partnership, participants, balances);
         proposals.push(getProposalId(tx))
         tx = await token.proposeAddParticipant(AllocationGroup.Marketing, participants, balances);
+        proposals.push(getProposalId(tx))
+        tx = await token.proposeAddParticipant(AllocationGroup.Stacking, participants, balances);
         proposals.push(getProposalId(tx))
         tx = await token.proposeAddParticipant(AllocationGroup.Ecosystem, participants, balances);
         proposals.push(getProposalId(tx))
         tx = await token.proposeAddParticipant(AllocationGroup.Farming, participants, balances);
+        proposals.push(getProposalId(tx))
+        tx = await token.proposeAddParticipant(AllocationGroup.Liquidity, participants, balances);
         proposals.push(getProposalId(tx))
 
         await advanceTimeAndBlock(2 * DAY)
@@ -112,35 +132,6 @@ contract('IMP', (accounts) => {
                 token.confirmProposal(getProposalId(tx)),
             )
         });
-    })
-
-    describe("Mainnet", () => {
-        let token;
-
-        before(async () => {
-            token = await IMP.new('test', 'test', 30000, accounts.slice(0, 3), { from: accounts[0] });
-            const tx = await token.proposeSetTGEPassed();
-            await advanceTimeAndBlock(2 * DAY)
-            await token.confirmProposal(getProposalId(tx), {from: accounts[1]})
-        })
-
-        it('Set mainnet launched', async () => {
-            const tx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY)
-            await token.confirmProposal(getProposalId(tx), {from: accounts[1]})
-
-            const mainnetLaunchTimestamp = await token.mainnetLaunchTimestamp();
-            expect(mainnetLaunchTimestamp.toNumber()).to.be.not.equal(0);
-        });
-
-        it('Mainnet can been set only one', async () => {
-            const tx = await token.proposeMainnetLaunched();
-            await advanceTimeAndBlock(2 * DAY)
-            await expectRevert.unspecified(
-                token.confirmProposal(getProposalId(tx)),
-            )
-        });
-
     })
 
     describe("Add participants", () => {

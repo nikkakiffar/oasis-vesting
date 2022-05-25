@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@openzeppelin/contracts": "^4.3.3",
+    "@openzeppelin/contracts": "^4.6.0",
     "truffle-flattener": "^1.6.0"
   },
   "devDependencies": {
