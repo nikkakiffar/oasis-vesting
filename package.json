@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.3",
+    "truffle-flattener": "^1.6.0"
+  },
+  "devDependencies": {
+    "@openzeppelin/test-helpers": "^0.5.15",
+    "solidity-coverage": "^0.7.17"
+  },
+  "scripts": {
+    "compile": "truffle compile",
+    "test": "truffle test",
+    "test:coverage": "truffle run coverage",
+    "flat": "truffle-flattener contracts/IMP.sol > IMP.sol"
+  }
+}
