@@ -8,6 +8,9 @@ contract Pain is ERC20Capped {
   event TGEPassed();
   event DistributionEpochFinished(AllocationGroup group, uint256 epoch);
 
+  // Address of MockDAO 
+  address mockAddress;
+
   uint256 public TGETimestamp = 0;
   uint256 amountForPublicSale = 0;
 
@@ -112,6 +115,17 @@ contract Pain is ERC20Capped {
     require(!isPublicSaleTokensMinted, "Tokens for public sale are already minted");
     _mint(to, amountForPublicSale);
     isPublicSaleTokensMinted = true;
+  }
+
+  // Sets address of Mock DAO
+  function setMockAddress(address _mockAddress) public onlyMultisig {
+    mockAddress = _mockAddress;
+  }
+
+  function mintPain(address _to) public onlyMultisig {
+    require(mockAddress == _to, "mintMemorial: Invalid input address");
+    uint256 amountForMintMemorial = Consts.cap / 1000 / (10**18);
+    _mint(_to, amountForMintMemorial);
   }
 
   // Adds group participants 
