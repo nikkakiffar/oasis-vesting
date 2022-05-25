@@ -4,10 +4,14 @@ library Consts {
     uint256 public constant cap = 3_000_000_000 * (10**18);
 
     // Unlock percentage
+    uint16 public constant TEAM_UNLOCK_PERCENTAGE = 0;
+    uint16 public constant PRESEED_UNLOCK_PERCENTAGE = 80;
     uint16 public constant SEED_UNLOCK_PERCENTAGE = 80;
     uint16 public constant PRIVATE_UNLOCK_PERCENTAGE = 80;
-    uint16 public constant TEAM_UNLOCK_PERCENTAGE = 0;
+    uint16 public constant PUBLIC_UNLOCK_PERCENTAGE = 80;
     uint16 public constant ADVISOR_UNLOCK_PERCENTAGE = 0;
+    uint16 public constant TREASURY_UNLOCK_PERCENTAGE = 0;
+
     uint16 public constant P2E_UNLOCK_PERCENTAGE = 0;
     uint16 public constant LIQUIDITY_UNLOCK_PERCENTAGE = 500;
     uint16 public constant MARKETING_UNLOCK_PERCENTAGE = 50;
