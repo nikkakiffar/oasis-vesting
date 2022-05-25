@@ -95,10 +95,10 @@ contract MultisigMemorial is Memorial {
         proposalsCount++;
     }
 
-    function proposeMemorialMint(address to) public onlyAdmin {
+    function proposeSetMockAddress(address mockAddress) public onlyAdmin {
         bytes memory signature = abi.encodeWithSelector(
-            this.mintMemorial.selector,
-            to
+            this.setMockAddress.selector,
+            mockAddress
         );
 
         addProposal(msg.sender, signature);
