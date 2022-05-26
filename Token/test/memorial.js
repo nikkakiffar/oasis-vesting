@@ -1,5 +1,4 @@
 const Memorial = artifacts.require("./MultisigMemorial")
-const MockDAO = artifacts.require("./MockDAO")
 
 const {
     BN,           // Big Number support
@@ -824,34 +823,5 @@ contract('Memorial', (accounts) => {
 
 })
 
-contract('MockDAO', (accounts) => {
-    let token;
-    let mock;
 
-    before(async () => {
-        token = await Memorial.new('test', 'test', 30000, accounts.slice(0, 3), { from: accounts[0] });
-        mock = await MockDAO.new(token.address);
-    })
-
-    it('Mint memorial tokens from DAO', async () => { 
-        const proposals = []
-
-        let tx = await token.proposeSetMockAddress(accounts[4]);
-        proposals.push(getProposalId(tx))
-
-        await advanceTimeAndBlock(2 * DAY)
-
-        for (let i=0; i<proposals.length; i++) {
-            await token.confirmProposal(proposals[i], { from: accounts[1]})
-        }
-
-        const balanceBeforeMint = await token.balanceOf(accounts[4]);
-        const cap =  await token.cap();
-
-        await mock.mint(accounts[4])
-        const balanceAfterMint =  await token.balanceOf(accounts[4]);
-        expect((balanceBeforeMint.toNumber() + cap/10**18/1000).toString()).to.be.equal((balanceAfterMint).toString())
-    });
-
-})
 
