@@ -1,20 +1,30 @@
 pragma solidity ^0.8.0;
 
-import "./Pain.sol";
+import "./IMintable.sol";
 
 contract MockDAO {
 
-    address public tokenAddress;
+    address public memorialContract;
+    address public painContract;
 
-    constructor(address _tokenAddress) {
-        tokenAddress = _tokenAddress;
+    constructor(address _memorialContract, address _painContract) {
+        memorialContract = _memorialContract;
+        painContract = _painContract;
     }
 
-    function setTokenAddress(address _newAddress) public {
-        tokenAddress = _newAddress;
+    function setMemorialAddress(address _newAddress) public {
+        memorialContract = _newAddress;
     }
 
-    function mint(address _to) public {
-        Pain(tokenAddress).mintPain(_to);
+    function setPainAddress(address _newAddress) public {
+        painContract = _newAddress;
+    }
+
+    function mintMemorial(address _to) public {
+        IMintable(memorialContract).mint(_to);
+    }
+    
+    function mintPain(address _to) public {
+        IMintable(painContract).mint(_to);
     }
 }
