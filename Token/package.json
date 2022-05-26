@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@openzeppelin/contracts": "^4.6.0",
+    "@truffle/hdwallet-provider": "^2.0.8",
+    "dotenv": "^16.0.1",
     "truffle-flattener": "^1.6.0"
   },
   "devDependencies": {
@@ -11,6 +13,8 @@
     "compile": "truffle compile",
     "test": "truffle test",
     "test:coverage": "truffle run coverage",
-    "flat": "truffle-flattener contracts/IMP.sol > IMP.sol"
+    "flat:memo": "truffle-flattener contracts/Memorial/Memorial.sol > FlattenedMemorial.sol",
+    "flat:pain": "truffle-flattener contracts/Pain/Pain.sol > FlattenedPain.sol",
+    "flat:dao": "truffle-flattener contracts/MockDAO.sol > FlattenedMockDAO.sol"
   }
 }
