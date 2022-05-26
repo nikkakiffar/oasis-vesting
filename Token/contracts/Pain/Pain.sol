@@ -1,10 +1,10 @@
 pragma solidity ^0.8.3;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
-import "./Consts.sol";
-import "./IMintable.sol";
+import "./PainConsts.sol";
+import "../IMintable.sol";
 
-contract Pain is ERC20Capped, IMintable{
+contract Pain is ERC20Capped, IMintable {
 
   event TGEPassed();
   event DistributionEpochFinished(AllocationGroup group, uint256 epoch);
@@ -48,66 +48,66 @@ contract Pain is ERC20Capped, IMintable{
     string memory _name,
     string memory _symbol,
     uint256 _amountForPublicSale
-  ) ERC20(_name, _symbol) ERC20Capped(Consts.cap) {
+  ) ERC20(_name, _symbol) ERC20Capped(PainConsts.cap) {
     // Preseed group
-    groups[AllocationGroup.Preseed].unlockPercentage = Consts.PRESEED_UNLOCK_PERCENTAGE;
-    groups[AllocationGroup.Preseed].lockPeriod = Consts.PRESEED_LOCK_PERIOD;
-    groups[AllocationGroup.Preseed].vestingEpochs = Consts.PRESEED_VESTING_EPOCHS;
+    groups[AllocationGroup.Preseed].unlockPercentage = PainConsts.PRESEED_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Preseed].lockPeriod = PainConsts.PRESEED_LOCK_PERIOD;
+    groups[AllocationGroup.Preseed].vestingEpochs = PainConsts.PRESEED_VESTING_EPOCHS;
 
     // Seed group
-    groups[AllocationGroup.Seed].unlockPercentage = Consts.SEED_UNLOCK_PERCENTAGE;
-    groups[AllocationGroup.Seed].lockPeriod = Consts.SEED_LOCK_PERIOD;
-    groups[AllocationGroup.Seed].vestingEpochs = Consts.SEED_VESTING_EPOCHS;
+    groups[AllocationGroup.Seed].unlockPercentage = PainConsts.SEED_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Seed].lockPeriod = PainConsts.SEED_LOCK_PERIOD;
+    groups[AllocationGroup.Seed].vestingEpochs = PainConsts.SEED_VESTING_EPOCHS;
 
     // Private
-    groups[AllocationGroup.Private].unlockPercentage = Consts.PRIVATE_UNLOCK_PERCENTAGE;
-    groups[AllocationGroup.Private].lockPeriod = Consts.PRIVATE_LOCK_PERIOD;
-    groups[AllocationGroup.Private].vestingEpochs = Consts.PRIVATE_VESTING_EPOCHS;
+    groups[AllocationGroup.Private].unlockPercentage = PainConsts.PRIVATE_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Private].lockPeriod = PainConsts.PRIVATE_LOCK_PERIOD;
+    groups[AllocationGroup.Private].vestingEpochs = PainConsts.PRIVATE_VESTING_EPOCHS;
 
     // Public
-    groups[AllocationGroup.Public].unlockPercentage = Consts.PUBLIC_UNLOCK_PERCENTAGE;
-    groups[AllocationGroup.Public].lockPeriod = Consts.PUBLIC_LOCK_PERIOD;
-    groups[AllocationGroup.Public].vestingEpochs = Consts.PUBLIC_VESTING_EPOCHS;
+    groups[AllocationGroup.Public].unlockPercentage = PainConsts.PUBLIC_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Public].lockPeriod = PainConsts.PUBLIC_LOCK_PERIOD;
+    groups[AllocationGroup.Public].vestingEpochs = PainConsts.PUBLIC_VESTING_EPOCHS;
 
     // Advisor
-    groups[AllocationGroup.Advisor].unlockPercentage = Consts.ADVISOR_UNLOCK_PERCENTAGE;
-    groups[AllocationGroup.Advisor].lockPeriod = Consts.ADVISOR_LOCK_PERIOD;
-    groups[AllocationGroup.Advisor].vestingEpochs = Consts.ADVISOR_VESTING_EPOCHS;
+    groups[AllocationGroup.Advisor].unlockPercentage = PainConsts.ADVISOR_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Advisor].lockPeriod = PainConsts.ADVISOR_LOCK_PERIOD;
+    groups[AllocationGroup.Advisor].vestingEpochs = PainConsts.ADVISOR_VESTING_EPOCHS;
 
     // Treasury
-    groups[AllocationGroup.Treasury].unlockPercentage = Consts.TREASURY_UNLOCK_PERCENTAGE;
-    groups[AllocationGroup.Treasury].lockPeriod = Consts.TREASURY_LOCK_PERIOD;
-    groups[AllocationGroup.Treasury].vestingEpochs = Consts.TREASURY_VESTING_EPOCHS;
+    groups[AllocationGroup.Treasury].unlockPercentage = PainConsts.TREASURY_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Treasury].lockPeriod = PainConsts.TREASURY_LOCK_PERIOD;
+    groups[AllocationGroup.Treasury].vestingEpochs = PainConsts.TREASURY_VESTING_EPOCHS;
 
     // Partnership
-    groups[AllocationGroup.Partnership].unlockPercentage = Consts.PARTNERSHIP_UNLOCK_PERCENTAGE;
-    groups[AllocationGroup.Partnership].lockPeriod = Consts.PARTNERSHIP_LOCK_PERIOD;
-    groups[AllocationGroup.Partnership].vestingEpochs = Consts.PARTNERSHIP_VESTING_EPOCHS;
+    groups[AllocationGroup.Partnership].unlockPercentage = PainConsts.PARTNERSHIP_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Partnership].lockPeriod = PainConsts.PARTNERSHIP_LOCK_PERIOD;
+    groups[AllocationGroup.Partnership].vestingEpochs = PainConsts.PARTNERSHIP_VESTING_EPOCHS;
 
     // Marketing
-    groups[AllocationGroup.Marketing].unlockPercentage = Consts.MARKETING_UNLOCK_PERCENTAGE;
-    groups[AllocationGroup.Marketing].lockPeriod = Consts.MARKETING_LOCK_PERIOD;
-    groups[AllocationGroup.Marketing].vestingEpochs = Consts.MARKETING_VESTING_EPOCHS;
+    groups[AllocationGroup.Marketing].unlockPercentage = PainConsts.MARKETING_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Marketing].lockPeriod = PainConsts.MARKETING_LOCK_PERIOD;
+    groups[AllocationGroup.Marketing].vestingEpochs = PainConsts.MARKETING_VESTING_EPOCHS;
 
     // Staking
-    groups[AllocationGroup.Staking].unlockPercentage = Consts.STAKING_UNLOCK_PERCENTAGE;
-    groups[AllocationGroup.Staking].lockPeriod = Consts.STAKING_LOCK_PERIOD;
-    groups[AllocationGroup.Staking].vestingEpochs = Consts.STAKING_VESTING_EPOCHS;
+    groups[AllocationGroup.Staking].unlockPercentage = PainConsts.STAKING_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Staking].lockPeriod = PainConsts.STAKING_LOCK_PERIOD;
+    groups[AllocationGroup.Staking].vestingEpochs = PainConsts.STAKING_VESTING_EPOCHS;
 
     // Ecosystem
-    groups[AllocationGroup.Ecosystem].unlockPercentage = Consts.ECOSYSTEM_UNLOCK_PERCENTAGE;
-    groups[AllocationGroup.Ecosystem].lockPeriod = Consts.ECOSYSTEM_LOCK_PERIOD;
-    groups[AllocationGroup.Ecosystem].vestingEpochs = Consts.ECOSYSTEM_VESTING_EPOCHS;
+    groups[AllocationGroup.Ecosystem].unlockPercentage = PainConsts.ECOSYSTEM_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Ecosystem].lockPeriod = PainConsts.ECOSYSTEM_LOCK_PERIOD;
+    groups[AllocationGroup.Ecosystem].vestingEpochs = PainConsts.ECOSYSTEM_VESTING_EPOCHS;
 
     // Farming
-    groups[AllocationGroup.Farming].unlockPercentage = Consts.FARMING_UNLOCK_PERCENTAGE;
-    groups[AllocationGroup.Farming].lockPeriod = Consts.FARMING_LOCK_PERIOD;
-    groups[AllocationGroup.Farming].vestingEpochs = Consts.FARMING_VESTING_EPOCHS;
+    groups[AllocationGroup.Farming].unlockPercentage = PainConsts.FARMING_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Farming].lockPeriod = PainConsts.FARMING_LOCK_PERIOD;
+    groups[AllocationGroup.Farming].vestingEpochs = PainConsts.FARMING_VESTING_EPOCHS;
 
     // Liquidity
-    groups[AllocationGroup.Liquidity].unlockPercentage = Consts.LIQUIDITY_UNLOCK_PERCENTAGE;
-    groups[AllocationGroup.Liquidity].lockPeriod = Consts.LIQUIDITY_LOCK_PERIOD;
-    groups[AllocationGroup.Liquidity].vestingEpochs = Consts.LIQUIDITY_VESTING_EPOCHS;
+    groups[AllocationGroup.Liquidity].unlockPercentage = PainConsts.LIQUIDITY_UNLOCK_PERCENTAGE;
+    groups[AllocationGroup.Liquidity].lockPeriod = PainConsts.LIQUIDITY_LOCK_PERIOD;
+    groups[AllocationGroup.Liquidity].vestingEpochs = PainConsts.LIQUIDITY_VESTING_EPOCHS;
 
     amountForPublicSale = _amountForPublicSale;
   }
@@ -125,7 +125,7 @@ contract Pain is ERC20Capped, IMintable{
 
   function mint(address _to) public override{
     require(DAOAddress == msg.sender, "mintMemorial: Invalid DAO address");
-    uint256 amountForMintMemorial = Consts.cap / 1000 / (10**18);
+    uint256 amountForMintMemorial = PainConsts.cap / 1000 / (10**18);
     _mint(_to, amountForMintMemorial);
   }
 
