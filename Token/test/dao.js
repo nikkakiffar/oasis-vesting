@@ -2,6 +2,33 @@ const Memorial = artifacts.require("./MultisigMemorial")
 const Pain = artifacts.require("./MultisigPain")
 const MockDAO = artifacts.require("./MockDAO")
 
+const {
+  BN,           // Big Number support
+  constants,    // Common constants, like the zero address and largest integers
+  expectEvent,  // Assertions for emitted events
+  expectRevert, // Assertions for transactions that should fail
+} = require('@openzeppelin/test-helpers');
+
+const { advanceTimeAndBlock, DAY, getProposalId } = require('./utils');
+
+const Web3 = require('web3');
+const web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
+
+advanceTime = (time) => {
+  return new Promise((resolve, reject) => {
+      web3.currentProvider.send({
+          jsonrpc: '2.0',
+          method: 'evm_increaseTime',
+          params: [time],
+          id: new Date().getTime()
+      }, (err, result) => {
+          if (err) { return reject(err) }
+          return resolve(result)
+      });
+  });
+};
+
+
 contract('MockDAO', (accounts) => {
   let memorial;
   let pain;
@@ -16,9 +43,9 @@ contract('MockDAO', (accounts) => {
   it('Mint memorial tokens from DAO', async () => { 
       const proposals = []
 
-      let tx = await memorial.proposeSetDAOAddress(accounts[4]);
+      let tx = await memorial.proposeSetDAOAddress(mock.address);
       proposals.push(getProposalId(tx))
-      tx = await pain.proposeSetDAOAddress(accounts[5]);
+      tx = await pain.proposeSetDAOAddress(mock.address);
       proposals.push(getProposalId(tx))
 
       await advanceTimeAndBlock(2 * DAY)
