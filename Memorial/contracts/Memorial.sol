@@ -2,8 +2,9 @@ pragma solidity ^0.8.3;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import "./Consts.sol";
+import "./IMintable.sol";
 
-contract Memorial is ERC20Capped {
+contract Memorial is ERC20Capped, IMintable {
 
   event TGEPassed();
   event DistributionEpochFinished(AllocationGroup group, uint256 epoch);
@@ -122,7 +123,7 @@ contract Memorial is ERC20Capped {
     isPublicSaleTokensMinted = true;
   }
 
-  function mintMemorial(address _to) public {
+  function mint(address _to) public override {
     require(DAOAddress == msg.sender, "mintMemorial: Invalid DAO address");
     uint256 amountForMintMemorial = Consts.cap / 1000 / (10**18);
     _mint(_to, amountForMintMemorial);
