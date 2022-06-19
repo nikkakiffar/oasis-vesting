@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 import "./IMintable.sol";
 import "./Memorial/Memorial.sol";
 import "./Pain/Pain.sol";
+
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MockDAO is Ownable {
@@ -41,7 +42,7 @@ contract MockDAO is Ownable {
         painContract = _newAddress;
     }
 
-    function _mintToken(address _to, bool _tokenType) internal {
+    function _mintToken(address _to, TokenType _tokenType) internal {
         if(_tokenType) {
             IMintable(painContract).mint(_to);
         } else {
